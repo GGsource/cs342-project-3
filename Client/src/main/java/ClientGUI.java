@@ -5,10 +5,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class ServerGUI extends Application {
+public class ClientGUI extends Application {
 	ListView<String> listItems;
 
 	public static void main(String[] args) {
@@ -18,9 +19,9 @@ public class ServerGUI extends Application {
 	//feel free to remove the starter code from this method
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Parent root = FXMLLoader.load(getClass()
-					.getResource("/FXML/ServerIntroFXML.fxml"));
-		primaryStage.setTitle("Welcome to the Morra Server!");
+		Parent clientIntroRoot = FXMLLoader.load(getClass()
+					.getResource("/FXML/ClientIntroFXML.fxml"));
+		primaryStage.setTitle("Welcome to Morra Client App!");
 		
 		//This ensures closing the window will close down the server
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -30,9 +31,10 @@ public class ServerGUI extends Application {
                 System.exit(0);
             }
 		});
-
-		Scene serverIntroScene = new Scene(root, 300, 300);
-		primaryStage.setScene(serverIntroScene);
+		
+				
+		Scene clientIntroScene = new Scene(clientIntroRoot, 300,300);
+		primaryStage.setScene(clientIntroScene);
 		primaryStage.show();
 	}
 

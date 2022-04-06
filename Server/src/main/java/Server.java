@@ -43,6 +43,10 @@ public class Server {
                     }
                     callback.accept("New client has connected! They have been designated: " + c.getColor() + "!");
                     c.start();
+
+                    if (hasTwoPlayers()) {
+                        beginGame();
+                    }
                 }
             }
             catch (Exception e) {
@@ -83,15 +87,19 @@ public class Server {
                     if (this.isRed) {
                         //red just disconnected, remove it and send blue back into the waiting queue
                         clientRed = null;
-                        clientGuestList.push(clientBlue);
-                        clientBlue = null;
+                        if (clientBlue != null) {
+                            clientGuestList.push(clientBlue);
+                            clientBlue = null;
+                        }
                         interruptGame();
                     }
                     else if (this.isBlue) {
                         //Blue just disconnected, remove it and send red back to waiting
                         clientBlue = null;
-                        clientGuestList.push(clientRed);
-                        clientRed = null;
+                        if (clientRed != null) {
+                            clientGuestList.push(clientRed);
+                            clientRed = null;
+                        }
                         interruptGame();
                     }
                     else {
@@ -111,9 +119,20 @@ public class Server {
         }
 
         public void interruptGame() {
-            System.out.println("Someone left the game before it could be finished.");
+            System.out.println("A player left before game could be finished.");
             //Should check if new pairing can be made immediately
-            //
+            if (!clientGuestList.isEmpty()) {
+                clientRed = clientGuestList.pop();
+                clientRed.isRed = true;
+            }
+            if (!clientGuestList.isEmpty()) {
+                clientBlue = clientGuestList.pop();
+                clientBlue.isBlue = true;
+            }
+            //0, 1, or 2 players have now been assigned.
+            if (hasTwoPlayers()) {
+                beginGame();
+            }
         }
     }
 
@@ -122,5 +141,13 @@ public class Server {
             return true;
         }
         return false;
+    }
+
+    public void beginGame() {
+        try {
+            clientRed.out.writeObject("You have been assigned Player Red");
+            clientBlue.out.writeObject("You have been assigned Player Blue");
+        }
+        catch (Exception e) {System.out.println("Uh oh.. Exception when trying to write to players...");}
     }
 }

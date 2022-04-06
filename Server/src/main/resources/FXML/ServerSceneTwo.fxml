@@ -7,5 +7,5 @@
 
 <VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="sceneTwoRoot" alignment="center" fx:controller="ServerController">
     <Label fx:id = "sceneTwoLabel" text = "Welcome to Server Scene 2!"/>
-    <ListView fx:id="dialogueView" />
+    <ListView fx:id="serverDialogueView" />
 </VBox>

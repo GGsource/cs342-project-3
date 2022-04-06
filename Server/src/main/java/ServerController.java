@@ -18,7 +18,7 @@ public class ServerController implements Initializable {
     @FXML
     private TextField portField;
     @FXML
-    private ListView<String> dialogueView;
+    private ListView<String> serverDialogueView;
     @FXML
     private VBox sceneTwoRoot;
     @FXML
@@ -26,14 +26,18 @@ public class ServerController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //
+        serverDialogueView = new ListView<>();
     }
     //set on action methods here
     public void openServerMethod(ActionEvent e) throws IOException {
-        serverConnection = new Server(data -> { Platform.runLater(()->{ dialogueView.getItems().add(data.toString());}); }, Integer.parseInt(portField.getText()));
+        serverConnection = new Server(data -> {
+            Platform.runLater(()-> {
+                serverDialogueView.getItems().add(data.toString());
+            });
+        }, Integer.parseInt(portField.getText()));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/ServerSceneTwo.fxml"));
         Parent sceneTwoRoot = loader.load();
-        //ServerController sCtrl = loader.getController();
+        sceneTwoRoot.getStylesheets().add("/styles/ServerGameStyle.css");
         introSceneRoot.getScene().setRoot(sceneTwoRoot);
         System.out.println("Successfully changed to scene two!");
 

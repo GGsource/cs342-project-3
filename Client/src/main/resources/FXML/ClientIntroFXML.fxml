@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="clientIntroRoot" alignment="center" fx:controller="ClientController">
+	<VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="serverDetailsVBox" alignment="center">
+		<Label fx:id="portLabel" text="Please enter the server's port:" />
+		<TextField fx:id="portField" />
+		<Label fx:id="addressLabel" text="Please enter the server's address:" />
+		<TextField fx:id="addressField" />
+	</VBox>
+	<VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="connectVBox" alignment="center">
+		<Button fx:id = "connectButton" text = "connect" onAction = "#connectMethod" />
+	</VBox>
+</VBox>
