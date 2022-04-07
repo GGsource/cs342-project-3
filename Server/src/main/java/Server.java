@@ -127,7 +127,6 @@ public class Server {
                     }
                 }
                 else {
-                    //TODO: Check if this works properly
                     callback.accept("Not enough players for a new match, waiting for new players...");
                     if (clientRed != null) {
                         clientRed.out.writeObject("Not enough players for a new match, please wait for an opponent!");

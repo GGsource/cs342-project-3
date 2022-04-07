@@ -9,18 +9,15 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class ServerGUI extends Application {
-
 	public static void main(String[] args) {
 		launch(args);
 	}
 
-	//feel free to remove the starter code from this method
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Parent root = FXMLLoader.load(getClass()
-					.getResource("/FXML/ServerIntroFXML.fxml"));
-		primaryStage.setTitle("Welcome to the Morra Server!");
-		primaryStage.getIcons().add(new Image("/images/icon-server.png"));
+		Parent root = FXMLLoader.load(getClass().getResource("/FXML/ServerIntro.fxml")); //Load in proper FXML file
+		primaryStage.setTitle("Welcome to the Morra Server!"); //Window title
+		primaryStage.getIcons().add(new Image("/images/icon-server.png")); //Custom Icon!
 		
 		//This ensures closing the window will close down the server
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -31,9 +28,8 @@ public class ServerGUI extends Application {
             }
 		});
 
-		Scene serverIntroScene = new Scene(root, 600, 300);
+		Scene serverIntroScene = new Scene(root, 400, 400);
 		primaryStage.setScene(serverIntroScene);
 		primaryStage.show();
 	}
-
 }

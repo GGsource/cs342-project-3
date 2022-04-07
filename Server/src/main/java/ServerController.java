@@ -20,20 +20,19 @@ public class ServerController implements Initializable {
     @FXML
     private ListView<String> serverDialogueView;
     @FXML
-    private VBox sceneTwoRoot;
+    private VBox serverGameRoot;
     @FXML
-    private VBox introSceneRoot;
-    @FXML
-    private ListView<String> testView;
+    private VBox serverIntroRoot;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // serverDialogueView.getItems().add("Obamna LULW");
+        //No need to initialize anything :]
     }
-    //set on action methods here
+
+    //setOnAction methods go here
     public void openServerMethod(ActionEvent e) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/ServerSceneTwo.fxml"));
-        Parent sceneTwoRoot = loader.load();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/ServerGame.fxml"));
+        Parent serverGameRoot = loader.load();
         ServerController newController = loader.getController();
         
         serverConnection = new Server(data -> {
@@ -42,7 +41,7 @@ public class ServerController implements Initializable {
             });
         }, Integer.parseInt(portField.getText()));
 
-        sceneTwoRoot.getStylesheets().add("/styles/ServerGameStyle.css");
-        introSceneRoot.getScene().setRoot(sceneTwoRoot);
+        serverGameRoot.getStylesheets().add("/styles/ServerGameStyle.css");
+        serverIntroRoot.getScene().setRoot(serverGameRoot);
     }
 }

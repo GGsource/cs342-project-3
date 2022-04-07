@@ -5,7 +5,7 @@
 <!-- <?import javafx.scene.control.Button?> -->
 <?import javafx.scene.control.ListView?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="sceneTwoRoot" alignment="center" fx:controller="ServerController">
-    <Label fx:id = "sceneTwoLabel" text = "Welcome to Server Scene 2!"/>
+<VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="serverGameRoot" alignment="center" fx:controller="ServerController">
+    <Label fx:id = "serverGameLabel" text = "Welcome to The Morra Server"/>
     <ListView fx:id="serverDialogueView" />
 </VBox>

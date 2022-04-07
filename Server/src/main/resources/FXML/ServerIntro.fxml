@@ -4,7 +4,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Button?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="introSceneRoot" alignment="center" fx:controller="ServerController">
+<VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="serverIntroRoot" alignment="center" fx:controller="ServerController">
     <VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="portVBox" alignment="center">
         <Label fx:id="portLabel" text="Please enter your server port:" />
         <TextField fx:id="portField" text = "5555"/>
