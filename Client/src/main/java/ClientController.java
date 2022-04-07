@@ -29,13 +29,15 @@ public class ClientController implements Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        clientDialogueView = new ListView<>();
     }
 
     public void connectMethod(ActionEvent e) throws IOException{
-        clientConnection = new Client(data->{Platform.runLater(()->{clientDialogueView.getItems().add(data.toString());});}, addressField.getText(), Integer.parseInt(portField.getText()));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/ClientGameScene.fxml"));
         Parent clientGameRoot = loader.load();
+        ClientController newController = loader.getController();
+        
+        clientConnection = new Client(data->{Platform.runLater(()->{newController.clientDialogueView.getItems().add(data.toString());});}, addressField.getText(), Integer.parseInt(portField.getText()));
+
         clientIntroRoot.getScene().setRoot(clientGameRoot);
         System.out.println("Successfully changed to client game scene!");
         clientConnection.start();

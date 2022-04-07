@@ -7,9 +7,9 @@
 <VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="clientIntroRoot" alignment="center" fx:controller="ClientController">
 	<VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="serverDetailsVBox" alignment="center">
 		<Label fx:id="portLabel" text="Please enter the server's port:" />
-		<TextField fx:id="portField" />
+		<TextField fx:id="portField" text = "5555"/>
 		<Label fx:id="addressLabel" text="Please enter the server's address:" />
-		<TextField fx:id="addressField" />
+		<TextField fx:id="addressField" text = "127.0.0.1"/>
 	</VBox>
 	<VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="connectVBox" alignment="center">
 		<Button fx:id = "connectButton" text = "connect" onAction = "#connectMethod" />

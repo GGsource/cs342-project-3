@@ -4,12 +4,10 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class ServerGUI extends Application {
-	ListView<String> listItems;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -31,7 +29,7 @@ public class ServerGUI extends Application {
             }
 		});
 
-		Scene serverIntroScene = new Scene(root, 300, 300);
+		Scene serverIntroScene = new Scene(root, 600, 300);
 		primaryStage.setScene(serverIntroScene);
 		primaryStage.show();
 	}
