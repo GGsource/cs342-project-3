@@ -4,6 +4,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -19,6 +20,7 @@ public class ServerGUI extends Application {
 		Parent root = FXMLLoader.load(getClass()
 					.getResource("/FXML/ServerIntroFXML.fxml"));
 		primaryStage.setTitle("Welcome to the Morra Server!");
+		primaryStage.getIcons().add(new Image("/images/icon-server.png"));
 		
 		//This ensures closing the window will close down the server
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {

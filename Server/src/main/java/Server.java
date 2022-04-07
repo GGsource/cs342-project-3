@@ -15,7 +15,7 @@ public class Server {
     int chosenPort;
     ClientThread clientRed = null;
     ClientThread clientBlue = null;
-    boolean playersAssigned = false;
+    boolean isGameStarted = false;
 
     Server(Consumer<Serializable> call, int givenPort) {
         callback = call;
@@ -36,10 +36,6 @@ public class Server {
                     ClientThread c = new ClientThread(servingSocket.accept());
                     //System.out.println("Successfully got client!!");
                     c.start();
-
-                    if (!playersAssigned && hasTwoPlayers()) {
-                        beginGame();
-                    }
                 }
             }
             catch (Exception e) {
@@ -79,15 +75,15 @@ public class Server {
                 }
                 catch (Exception e) {
                     callback.accept(this.getRole() + " has disconnected!");
-                    if (this.isRed) {
+                    if (this.isRed ) {
                         //red just disconnected, remove it and send blue back into the waiting queue
                         clientRed = null;
-                        reassignPlayers();
+                        reassignPlayers(true);
                     }
                     else if (this.isBlue) {
                         //Blue just disconnected, remove it and send red back to waiting
                         clientBlue = null;
-                        reassignPlayers();
+                        reassignPlayers(false);
                     }
                     else {
                         clientGuestList.remove(this); //Unlist this guest since they left
@@ -105,20 +101,45 @@ public class Server {
             return "a Guest Observer";
         }
 
-        public void reassignPlayers() {
-            callback.accept("One of the main players left, looking for a replacement");
-            System.out.println("A player left before game could be finished");
-            playersAssigned = false;
-            //Should check if new pairing can be made immediately
-            if (clientRed == null && !clientGuestList.isEmpty()) {
-                clientRed = clientGuestList.pop();
-                clientRed.isRed = true;
-                callback.accept("Reselected Red Player");
+        public void reassignPlayers(boolean wasRed) {
+            if (wasRed) {
+                callback.accept("Red Player left, looking for a replacement...");
             }
-            if (clientBlue == null && !clientGuestList.isEmpty()) {
-                clientBlue = clientGuestList.pop();
-                clientBlue.isBlue = true;
-                callback.accept("Reselected Blue Player");
+            else {
+                callback.accept("Blue Player left, looking for a replacement...");
+            }
+            isGameStarted = false;
+            //Should check if new pairing can be made immediately
+            try {
+                if (!clientGuestList.isEmpty()) {
+                    ClientThread c = clientGuestList.remove();
+                    if (clientRed == null) {
+                        clientRed = c;
+                        clientRed.isRed = true;
+                        callback.accept("A new Red Player has been chosen!");
+                        clientRed.out.writeObject("You have been chosen as the new Red Player");
+                    }
+                    else if (clientBlue == null) {
+                        clientBlue = c;
+                        clientBlue.isBlue = true;
+                        callback.accept("A new Blue Player has been chosen!");
+                        clientBlue.out.writeObject("You have been chosen as the new Blue Player");
+                    }
+                }
+                else {
+                    //TODO: Check if this works properly
+                    callback.accept("Not enough players for a new match, waiting for new players...");
+                    if (clientRed != null) {
+                        clientRed.out.writeObject("Not enough players for a new match, please wait for an opponent!");
+                    }
+                    else if (clientBlue != null) {
+                        clientBlue.out.writeObject("Not enough players for a new match, please wait for an opponent!");
+                    }
+                }
+            }
+            catch (IOException e) {
+                System.out.println("Uh oh... failied to send message to new players...");
+                e.printStackTrace();
             }
             //0, 1, or 2 players have now been assigned.
             if (hasTwoPlayers()) {
@@ -136,17 +157,24 @@ public class Server {
 
     public void beginGame() {
         try {
-            
-            LinkedList<ClientThread> fullClientList = clientGuestList;
-            fullClientList.push(clientRed);
-            fullClientList.push(clientBlue);
-            for (ClientThread c : fullClientList) {
-                c.out.writeObject("Players Assigned. The game can now begin!");
+            isGameStarted = true;
+            // LinkedList<ClientThread> fullClientList = clientGuestList;
+            if (clientGuestList.contains(clientRed)) {callback.accept("Red was in the client list already?");}
+            if (clientGuestList.contains(clientBlue)) {callback.accept("Blue was in the client list already?");}
+            // fullClientList.push(clientRed);
+            // fullClientList.push(clientBlue);
+            clientRed.out.writeObject("New Game started! Good luck " + clientRed.getRole());
+            clientBlue.out.writeObject("New Game started! Good luck " + clientBlue.getRole());
+            for (ClientThread waiter : clientGuestList) {
+                waiter.out.writeObject("A round has started, you are an observer until its your turn");
             }
-            playersAssigned = true;
+            callback.accept("Red and Blue are ready to begin!");
             System.out.println("Both players are connected, the game can now begin!");
         }
-        catch (Exception e) {System.out.println("Uh oh.. Exception when trying to write to players...");}
+        catch (Exception e) {
+            System.out.println("Uh oh.. Exception when trying to write to players...");
+            e.printStackTrace();
+        }
     }
 
     private void assignRole(ClientThread c) {
@@ -163,10 +191,18 @@ public class Server {
             }
             else {
                 c.isGuest = true;
-                clientGuestList.push(c);
+                clientGuestList.add(c);
                 c.out.writeObject("You have been assigned to the waiting list");
             }
             callback.accept("New client has connected! They have been designated: " + c.getRole() + "!");
+            if (hasTwoPlayers()) {
+                if (!isGameStarted) {
+                    beginGame();
+                }
+            }
+            else {
+                c.out.writeObject("You are currently the only player, please wait for an opponent!");
+            }
         }
         catch (IOException e) {
             callback.accept("Uh oh. Couldn't write to thread's output...");

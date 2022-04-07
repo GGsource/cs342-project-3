@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -22,6 +23,7 @@ public class ClientGUI extends Application {
 		Parent clientIntroRoot = FXMLLoader.load(getClass()
 					.getResource("/FXML/ClientIntroFXML.fxml"));
 		primaryStage.setTitle("Welcome to Morra Client App!");
+		primaryStage.getIcons().add(new Image("/images/icon-client.png"));
 		
 		//This ensures closing the window will close down the server
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
