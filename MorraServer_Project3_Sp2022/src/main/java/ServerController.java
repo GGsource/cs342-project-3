@@ -20,8 +20,6 @@ public class ServerController implements Initializable {
     @FXML
     private ListView<String> serverDialogueView;
     @FXML
-    private VBox serverGameRoot;
-    @FXML
     private VBox serverIntroRoot;
 
     @Override

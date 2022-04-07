@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.function.Consumer;
+//TODO: Homestuck elevator music while players join?
 
 public class Server {
     int clientCount = 0;
