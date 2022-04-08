@@ -12,6 +12,7 @@ public class MorraInfo implements Serializable {
     public String msg;
     public boolean isGameWon = false;
     public boolean isWinnerRed = false;
+    public boolean isPlayerRed = false;
 
     MorraInfo() {
         playerRedPlays = new ArrayList<>();
@@ -36,7 +37,7 @@ public class MorraInfo implements Serializable {
             playerBluePoints += 1;
         }
     }
-    public void playerMove(int move, boolean wasRed) {
+    public void makeMove(int move, boolean wasRed) {
         if (wasRed) {
             playerRedPlays.add(move);
         }
@@ -44,7 +45,7 @@ public class MorraInfo implements Serializable {
             playerBluePlays.add(move);
         }
     }
-    public void playerGuess(int guess, boolean wasRed) {
+    public void makeGuess(int guess, boolean wasRed) {
         if (wasRed) {
             playerRedGuesses.add(guess);
         }

@@ -16,6 +16,8 @@ import javafx.scene.layout.VBox;
 
 public class ClientController implements Initializable{
     Client clientConnection;
+    int selectedPlay;
+    int selectedGuess;
 
     @FXML
     private TextField portField;
@@ -46,13 +48,28 @@ public class ClientController implements Initializable{
         
         clientConnection = new Client(data->{Platform.runLater(()->{newController.clientDialogueView.getItems().add(data.toString());});}, addressField.getText(), Integer.parseInt(portField.getText()));
         
-        newController.buttonBox.setDisable(true);
+        //newController.buttonBox.setDisable(true);
         newController.guessField.setDisable(true);
         newController.confirmButton.setDisable(true);
 
         clientIntroRoot.getScene().setRoot(clientGameRoot);
         System.out.println("Successfully changed to client game scene!");
         clientConnection.start();
+    }
+    public void selectPlay(ActionEvent e) {
+        Button sourceButton = (Button)e.getSource();
+        selectedPlay = Integer.parseInt(sourceButton.getText());
+        guessField.setDisable(false);
+        confirmButton.setDisable(false);
+        System.out.println("Your play is: " + selectedPlay);
+        //Now player can type in guessField and then confirm
+    }
+    public void confirmChoices(ActionEvent e) throws IOException {
+        selectedGuess = Integer.parseInt(guessField.getText());
+        clientConnection.localInfo.makeMove(selectedPlay, clientConnection.localInfo.isPlayerRed);
+        clientConnection.localInfo.makeGuess(selectedGuess, clientConnection.localInfo.isPlayerRed);
+        clientConnection.send(clientConnection.localInfo);//Send its modified copy
+        //Now server should have updated itself with the changes
     }
     
 }

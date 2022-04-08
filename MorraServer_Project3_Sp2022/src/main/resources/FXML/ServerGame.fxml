@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
 <!-- <?import javafx.scene.control.TextField?> -->
 <!-- <?import javafx.scene.control.Button?> -->
@@ -7,5 +8,9 @@
 
 <VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="serverGameRoot" alignment="center" fx:controller="ServerController">
     <Label fx:id = "serverGameLabel" text = "Welcome to The Morra Server"/>
+    <HBox xmlns:fx="http://javafx.com/fxml/1" styleClass="hbox" fx:id="connectedBox" alignment="center">
+        <Label fx:id = "connectedPlayersLabel" text = "Players Connected: "/>
+        <Label fx:id = "connectedGuestsLabel" text = "Guests Connected: "/>
+    </HBox>
     <ListView fx:id="serverDialogueView" />
 </VBox>

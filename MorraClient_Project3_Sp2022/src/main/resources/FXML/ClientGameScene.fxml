@@ -14,16 +14,17 @@
     <VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="bottomBox" alignment="center">
         <Label fx:id = "playLabel" text = "Select your play:" />
         <HBox xmlns:fx="http://javafx.com/fxml/1" styleClass="hbox" fx:id="buttonBox" alignment="center">
-            <Button fx:id = "btn1" text = "1"/>
-            <Button fx:id = "btn2" text = "2"/>
-            <Button fx:id = "btn3" text = "3"/>
-            <Button fx:id = "btn4" text = "4"/>
-            <Button fx:id = "btn5" text = "5"/>
-            <Button fx:id = "btn6" text = "6"/>
+            <Button fx:id = "btn0" text = "0" onAction = "#selectPlay"/>
+            <Button fx:id = "btn1" text = "1" onAction = "#selectPlay"/>
+            <Button fx:id = "btn2" text = "2" onAction = "#selectPlay"/>
+            <Button fx:id = "btn3" text = "3" onAction = "#selectPlay"/>
+            <Button fx:id = "btn4" text = "4" onAction = "#selectPlay"/>
+            <Button fx:id = "btn5" text = "5" onAction = "#selectPlay"/>
+            <Button fx:id = "btn6" text = "6" onAction = "#selectPlay"/>
         </HBox>
         <Label fx:id = "guessLabel" text = "Insert your guess:"/>
         <TextField fx:id = "guessField"/>
-        <Button fx:id = "confirmButton" text = "confirm selections" />
+        <Button fx:id = "confirmButton" text = "confirm selections" onAction = "#confirmChoices"/>
 
     </VBox>
 </VBox>

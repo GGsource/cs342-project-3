@@ -9,7 +9,8 @@ import java.util.function.Consumer;
 //TODO: Homestuck elevator music while players join?
 
 public class Server {
-    int clientCount = 0;
+    int playerCount = 0;
+    int guestCount = 0;
     LinkedList<ClientThread> clientGuestList = new LinkedList<>();
     TheServer ourServer;
     private Consumer<Serializable> callback;
@@ -169,9 +170,12 @@ public class Server {
             }
             callback.accept("Red and Blue are ready to begin!");
             //System.out.println("Both players are connected, the game can now begin!");
-
+            serverInfo = new MorraInfo();
             //Now send both players a copy of MoraInfo
-            
+            MorraInfo rInfo = serverInfo;
+            rInfo.isPlayerRed = true;
+            clientRed.out.writeObject(rInfo);//Need to let it know it is red
+            clientBlue.out.writeObject(serverInfo);
         }
         catch (Exception e) {
             System.out.println("Uh oh.. Exception when trying to write to players...");
@@ -235,14 +239,16 @@ public class Server {
             int blueGuess = serverInfo.playerBlueGuesses.get(serverInfo.playerBlueGuesses.size()-1);
             if (redGuess == correctTotal && blueGuess != correctTotal) {
                 serverInfo.wonRound(true); //Only red was correct!
+                callback.accept("Red guessed correctly! +1 point");
                 checkGameEnd(); //Check if the game has been won now
             }
             else if (blueGuess == correctTotal && redGuess != correctTotal) {
                 serverInfo.wonRound(false); //Only blue was correct!
+                callback.accept("Blue guessed correctly! +1 point");
                 checkGameEnd(); //Check if the game has been won now
             }
             else {
-                //TODO: If no one got points?
+                callback.accept("Tie, no one gets points 😔");
             }
         }
     }

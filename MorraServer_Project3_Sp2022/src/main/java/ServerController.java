@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -21,6 +22,13 @@ public class ServerController implements Initializable {
     private ListView<String> serverDialogueView;
     @FXML
     private VBox serverIntroRoot;
+    @FXML
+    private Label connectedPlayersLabel;
+    @FXML
+    private Label connectedGuestsLabel;
+    //TODO: ^Figure out how to use these to update when someone joins
+    //Manually trigger event?
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
