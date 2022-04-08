@@ -8,8 +8,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class ClientController implements Initializable{
@@ -25,6 +27,12 @@ public class ClientController implements Initializable{
     private VBox clientIntroRoot;
     @FXML
     private VBox clientGameRoot;
+    @FXML
+    private HBox buttonBox;
+    @FXML
+    private TextField guessField;
+    @FXML
+    private Button confirmButton;
 
 
     @Override
@@ -37,6 +45,10 @@ public class ClientController implements Initializable{
         ClientController newController = loader.getController();
         
         clientConnection = new Client(data->{Platform.runLater(()->{newController.clientDialogueView.getItems().add(data.toString());});}, addressField.getText(), Integer.parseInt(portField.getText()));
+        
+        newController.buttonBox.setDisable(true);
+        newController.guessField.setDisable(true);
+        newController.confirmButton.setDisable(true);
 
         clientIntroRoot.getScene().setRoot(clientGameRoot);
         System.out.println("Successfully changed to client game scene!");

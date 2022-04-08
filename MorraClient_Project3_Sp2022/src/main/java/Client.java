@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -13,6 +14,7 @@ public class Client extends Thread{
     private Consumer<Serializable> callback;
     String chosenAddress;
     int chosenPort;
+    MorraInfo localInfo;
 
     Client(Consumer<Serializable> call,String givenAddress, int givenPort) {
         callback = call;
@@ -32,8 +34,14 @@ public class Client extends Thread{
         }
         while (true) {
             try {
-                String message = in.readObject().toString();
-                callback.accept(message);
+                //Something has been sent, receive it
+                MorraInfo incomingInfo = (MorraInfo)in.readObject();
+                if (incomingInfo.isCarrierPigeon) { //A msg was sent!
+                    callback.accept(incomingInfo.msg);
+                }
+                else { //It wasn't a msg, it's the game's state
+                    localInfo = incomingInfo;
+                }
             }
             catch (Exception e) {
                 System.out.println("I (client) have disconnected.");
@@ -43,4 +51,14 @@ public class Client extends Thread{
             }
         }
     }
+
+    public void send(MorraInfo outgoingInfo) {
+		
+		try {
+			out.writeObject(outgoingInfo);
+		} catch (IOException e) {
+            System.out.println("Uh oh. Couldn't send info as client.");
+			e.printStackTrace();
+		}
+	}
 }

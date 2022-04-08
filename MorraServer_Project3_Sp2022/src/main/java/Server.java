@@ -17,6 +17,9 @@ public class Server {
     ClientThread clientRed = null;
     ClientThread clientBlue = null;
     boolean isGameStarted = false;
+    MorraInfo serverInfo;
+    boolean receivedRedChoice;
+    boolean receivedBlueChoice;
 
     Server(Consumer<Serializable> call, int givenPort) {
         callback = call;
@@ -71,8 +74,9 @@ public class Server {
 
             while (true) {
                 try {
-                    String data = in.readObject().toString();
-                    callback.accept(this.getRole() + "sent: " + data);
+                    MorraInfo receivedInfo = (MorraInfo)in.readObject();
+                    //A player sent info, receive it
+                    updateInfo(receivedInfo);
                 }
                 catch (Exception e) {
                     callback.accept(this.getRole() + " has disconnected!");
@@ -118,22 +122,22 @@ public class Server {
                         clientRed = c;
                         clientRed.isRed = true;
                         callback.accept("A new Red Player has been chosen!");
-                        clientRed.out.writeObject("You have been chosen as the new Red Player");
+                        clientRed.out.writeObject(new MorraInfo("You have been chosen as the new Red Player"));
                     }
                     else if (clientBlue == null) {
                         clientBlue = c;
                         clientBlue.isBlue = true;
                         callback.accept("A new Blue Player has been chosen!");
-                        clientBlue.out.writeObject("You have been chosen as the new Blue Player");
+                        clientBlue.out.writeObject(new MorraInfo("You have been chosen as the new Blue Player"));
                     }
                 }
                 else {
                     callback.accept("Not enough players for a new match, waiting for new players...");
                     if (clientRed != null) {
-                        clientRed.out.writeObject("Not enough players for a new match, please wait for an opponent!");
+                        clientRed.out.writeObject(new MorraInfo("Not enough players for a new match, please wait for an opponent!"));
                     }
                     else if (clientBlue != null) {
-                        clientBlue.out.writeObject("Not enough players for a new match, please wait for an opponent!");
+                        clientBlue.out.writeObject(new MorraInfo("Not enough players for a new match, please wait for an opponent!"));
                     }
                 }
             }
@@ -143,7 +147,7 @@ public class Server {
             }
             //0, 1, or 2 players have now been assigned.
             if (hasTwoPlayers()) {
-                beginGame();
+                InitializeGame();
             }
         }
     }
@@ -155,21 +159,19 @@ public class Server {
         return false;
     }
 
-    public void beginGame() {
+    public void InitializeGame() {
         try {
             isGameStarted = true;
-            // LinkedList<ClientThread> fullClientList = clientGuestList;
-            if (clientGuestList.contains(clientRed)) {callback.accept("Red was in the client list already?");}
-            if (clientGuestList.contains(clientBlue)) {callback.accept("Blue was in the client list already?");}
-            // fullClientList.push(clientRed);
-            // fullClientList.push(clientBlue);
-            clientRed.out.writeObject("New Game started! Good luck " + clientRed.getRole());
-            clientBlue.out.writeObject("New Game started! Good luck " + clientBlue.getRole());
+            clientRed.out.writeObject(new MorraInfo("New Game started! Good luck " + clientRed.getRole()));
+            clientBlue.out.writeObject(new MorraInfo("New Game started! Good luck " + clientBlue.getRole()));
             for (ClientThread waiter : clientGuestList) {
-                waiter.out.writeObject("A round has started, you are an observer until its your turn");
+                waiter.out.writeObject(new MorraInfo("A round has started, you are an observer until its your turn"));
             }
             callback.accept("Red and Blue are ready to begin!");
-            System.out.println("Both players are connected, the game can now begin!");
+            //System.out.println("Both players are connected, the game can now begin!");
+
+            //Now send both players a copy of MoraInfo
+            
         }
         catch (Exception e) {
             System.out.println("Uh oh.. Exception when trying to write to players...");
@@ -182,30 +184,75 @@ public class Server {
             if (clientRed == null) {
                 clientRed = c;
                 clientRed.isRed = true;
-                clientRed.out.writeObject("You have been assigned Player Red");
+                clientRed.out.writeObject(new MorraInfo("You have been assigned Player Red"));
             }
             else if (clientBlue == null) {
                 clientBlue = c;
                 clientBlue.isBlue = true;
-                clientBlue.out.writeObject("You have been assigned Player Blue");
+                clientBlue.out.writeObject(new MorraInfo("You have been assigned Player Blue"));
             }
             else {
                 c.isGuest = true;
                 clientGuestList.add(c);
-                c.out.writeObject("You have been assigned to the waiting list");
+                c.out.writeObject(new MorraInfo("You have been assigned to the waiting list"));
             }
             callback.accept("New client has connected! They have been designated: " + c.getRole() + "!");
             if (hasTwoPlayers()) {
                 if (!isGameStarted) {
-                    beginGame();
+                    InitializeGame();
                 }
             }
             else {
-                c.out.writeObject("You are currently the only player, please wait for an opponent!");
+                c.out.writeObject(new MorraInfo("You are currently the only player, please wait for an opponent!"));
             }
         }
         catch (IOException e) {
             callback.accept("Uh oh. Couldn't write to thread's output...");
+        }
+    }
+
+    private void updateInfo(MorraInfo incomingInfo) {
+        //Check who sent by seeing which arraylist was updated
+        if (incomingInfo.playerRedPlays.size() > serverInfo.playerRedPlays.size()) {
+            //Red plays increased so it was sent by red!
+            serverInfo.playerRedPlays = incomingInfo.playerRedPlays;
+            serverInfo.playerRedGuesses = incomingInfo.playerRedGuesses;
+            receivedRedChoice = true;
+        }
+        else {
+            //Red plays didn't increase so this was sent by blue!
+            serverInfo.playerBluePlays = incomingInfo.playerBluePlays;
+            serverInfo.playerBlueGuesses = incomingInfo.playerBlueGuesses;
+            receivedBlueChoice = true;
+        }
+        //Now we have received the choices of one of the players, determine
+        //if both have sent in their answers and if so pick winner
+        if (receivedRedChoice && receivedBlueChoice) {
+            //Both have given their guesses
+            int correctTotal = serverInfo.playerRedPlays.get(serverInfo.playerRedPlays.size()-1) + serverInfo.playerBluePlays.get(serverInfo.playerBluePlays.size()-1);
+            //we now have the correct total, compare it to the guesses
+            int redGuess = serverInfo.playerRedGuesses.get(serverInfo.playerRedGuesses.size()-1);
+            int blueGuess = serverInfo.playerBlueGuesses.get(serverInfo.playerBlueGuesses.size()-1);
+            if (redGuess == correctTotal && blueGuess != correctTotal) {
+                serverInfo.wonRound(true); //Only red was correct!
+                checkGameEnd(); //Check if the game has been won now
+            }
+            else if (blueGuess == correctTotal && redGuess != correctTotal) {
+                serverInfo.wonRound(false); //Only blue was correct!
+                checkGameEnd(); //Check if the game has been won now
+            }
+            else {
+                //TODO: If no one got points?
+            }
+        }
+    }
+
+    private void checkGameEnd() {
+        if (serverInfo.playerBluePoints == 2) {
+            //Blue won!
+        }
+        else if (serverInfo.playerRedPoints == 2) {
+            //Red won!
         }
     }
 }

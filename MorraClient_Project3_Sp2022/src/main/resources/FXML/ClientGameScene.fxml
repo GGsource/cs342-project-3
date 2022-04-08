@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
 
 <VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="clientGameRoot" alignment="center" fx:controller="ClientController">
-    <Label fx:id = "clientGameLabel" text = "Welcome to Morra Game! You've connected as a client"/>
-    <ListView fx:id="clientDialogueView"/>
+    <VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="topBox" alignment="center">
+        <Label fx:id = "clientGameLabel" text = "Welcome to Morra Game! You've connected as a client"/>
+        <ListView fx:id="clientDialogueView"/>
+    </VBox>
+    <VBox xmlns:fx="http://javafx.com/fxml/1" styleClass="vbox" fx:id="bottomBox" alignment="center">
+        <Label fx:id = "playLabel" text = "Select your play:" />
+        <HBox xmlns:fx="http://javafx.com/fxml/1" styleClass="hbox" fx:id="buttonBox" alignment="center">
+            <Button fx:id = "btn1" text = "1"/>
+            <Button fx:id = "btn2" text = "2"/>
+            <Button fx:id = "btn3" text = "3"/>
+            <Button fx:id = "btn4" text = "4"/>
+            <Button fx:id = "btn5" text = "5"/>
+            <Button fx:id = "btn6" text = "6"/>
+        </HBox>
+        <Label fx:id = "guessLabel" text = "Insert your guess:"/>
+        <TextField fx:id = "guessField"/>
+        <Button fx:id = "confirmButton" text = "confirm selections" />
+
+    </VBox>
 </VBox>
