@@ -15,7 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class ClientController implements Initializable{
-    Client clientConnection;
+    public Client clientConnection;
     int selectedPlay;
     int selectedGuess;
 

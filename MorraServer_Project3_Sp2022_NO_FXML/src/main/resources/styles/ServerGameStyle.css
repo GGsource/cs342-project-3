@@ -1,0 +1,7 @@
+.VBox{
+    -fx-padding: 15px;
+    -fx-background-color: GoldenRod;
+}
+.Label {
+    -fx-text-fill: white;
+}
