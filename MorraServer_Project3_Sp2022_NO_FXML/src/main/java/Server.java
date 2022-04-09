@@ -20,7 +20,6 @@ public class Server {
     MorraInfo serverInfo;
     boolean receivedRedChoice;
     boolean receivedBlueChoice;
-    MorraInfo receivedInfo;
 
     Server(Consumer<Serializable> call, int givenPort) {
         callback = call;
@@ -77,7 +76,7 @@ public class Server {
             while (true) {
                 try {
                     //FIXME: on round 2 it will still send round 1 values
-                    receivedInfo = (MorraInfo)in.readObject();
+                    MorraInfo receivedInfo = (MorraInfo)in.readObject();
 
                     System.out.println("Incoming info before deciding if its red or blue:");
                     System.out.println("incoming redPlays:    " + receivedInfo.playerRedPlays);
@@ -226,6 +225,7 @@ public class Server {
 
     private void updateInfo(MorraInfo incomingInfo) {
         //System.out.println("Entered updateInfo...");
+        messageAllClients("One of the players has submitted their guess...");
         try {//Check who sent by seeing which arraylist was updated
             if (incomingInfo.playerRedPlays.size() > serverInfo.playerRedPlays.size()) {
                 System.out.println("incomingInfo has a larger array of clientRed's plays so it must be sent by Red...");
@@ -297,13 +297,13 @@ public class Server {
         try {
             if (serverInfo.playerBluePoints == 2) {
                 //Blue won!
-                //TODO: Enable Replay/Quit buttons
+                System.out.println("Blue won!");
                 messageAllClients("Blue wins the game!");
                 clientBlue.out.writeObject("Congratulations you won the game!");
             }
             else if (serverInfo.playerRedPoints == 2) {
                 //Red won!
-                //TODO: Enable replay/quit buttons
+                System.out.println("Red won!");
                 messageAllClients("Red wins the game!");
                 clientRed.out.writeObject("Congratulations you won the game!");
             }
@@ -354,7 +354,8 @@ public class Server {
         try {
             if (clientRed != null)
                 clientRed.out.writeObject(new MorraInfo(true));
-            clientBlue.out.writeObject(new MorraInfo(true));
+            if (clientBlue != null)
+                clientBlue.out.writeObject(new MorraInfo(true));
         } catch (IOException e) {
             System.out.println("Failed to tell the players to clear their games 😔");
         }

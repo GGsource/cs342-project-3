@@ -34,6 +34,28 @@ public class MorraInfo implements Serializable {
         isResetPigeon = true;
     }
 
+    MorraInfo(MorraInfo infoToCopy) {
+        this.playerRedPlays = new ArrayList<>();
+        this.playerBluePlays = new ArrayList<>();
+        this.playerRedGuesses = new ArrayList<>();
+        this.playerBlueGuesses = new ArrayList<>();
+
+        this.playerRedPoints = infoToCopy.playerRedPoints;
+        this.playerBluePoints = infoToCopy.playerBluePoints;
+        for (int i = 0; i < infoToCopy.playerRedPlays.size();i++) {
+            // System.out.println("i is " + i + " and the arrayList we received is size " + infoToCopy.playerRedPlays.size());
+            // System.out.println("the arrayList we received contains: " + infoToCopy.playerRedPlays);
+            // System.out.println("the arrayList at index 0 contains:  " + infoToCopy.playerRedPlays.get(i));
+            this.playerRedPlays.add(infoToCopy.playerRedPlays.get(i));
+            this.playerRedGuesses.add(infoToCopy.playerRedGuesses.get(i));
+        }
+        for (int i = 0; i < infoToCopy.playerBluePlays.size();i++) {
+            this.playerBluePlays.add(infoToCopy.playerBluePlays.get(i));
+            this.playerBlueGuesses.add(infoToCopy.playerBlueGuesses.get(i));
+        }
+        this.isPlayerRed = infoToCopy.isPlayerRed;
+    }
+
     //Since we only have 2 players, using a boolean to tell who called a
     //method is much more convenient. If wasRed == 1 then it was redPlayer.
     

@@ -60,7 +60,7 @@ public class ClientGUI extends Application {
 		connectBox.setAlignment(Pos.CENTER);
 		VBox clientIntroBox = new VBox(serverDetailsBox, connectBox);
 		clientIntroBox.setAlignment(Pos.CENTER);
-		sceneMap.put("clientIntroScene", new Scene(clientIntroBox, 300,300));
+		sceneMap.put("clientIntroScene", new Scene(clientIntroBox, 300, 300));
 
 		//Client Game Scene
 		Label welcomeLabel = new Label("Welcome to the Morra Client!");
@@ -93,7 +93,7 @@ public class ClientGUI extends Application {
 		quitOrNewBox.setAlignment(Pos.CENTER);
 		VBox clientGameBox = new VBox(topBox, bottomBox, quitOrNewBox);
 		clientGameBox.setAlignment(Pos.CENTER);
-		sceneMap.put("clientGameScene", new Scene(clientGameBox, 300, 300));
+		sceneMap.put("clientGameScene", new Scene(clientGameBox, 300, 700));
 
 		//Connect Button On Action Method
 		connectButton.setOnAction(e->{
@@ -119,11 +119,12 @@ public class ClientGUI extends Application {
 			selectedGuess = Integer.parseInt(guessField.getText());
 			clientConnection.localInfo.makeMove(selectedPlay, clientConnection.localInfo.isPlayerRed);
 			clientConnection.localInfo.makeGuess(selectedGuess, clientConnection.localInfo.isPlayerRed);
-			System.out.println("You decided to play: "+ clientConnection.localInfo.getLastPlay());
-			System.out.println("You decided to guess:"+ clientConnection.localInfo.getLastGuess());
-			System.out.println(clientConnection.localInfo.getPlaysList().size() + " plays so far:   " + clientConnection.localInfo.getPlaysList());
-			System.out.println(clientConnection.localInfo.getGuessList().size() + " guesses so far: " + clientConnection.localInfo.getGuessList());
-			clientConnection.send(clientConnection.localInfo);//Send its modified copy
+			MorraInfo outgoingInfo = new MorraInfo(clientConnection.localInfo);
+			System.out.println("You decided to play: "+ outgoingInfo.getLastPlay());
+			System.out.println("You decided to guess:"+ outgoingInfo.getLastGuess());
+			System.out.println(outgoingInfo.getPlaysList().size() + " plays so far:   " + outgoingInfo.getPlaysList());
+			System.out.println(outgoingInfo.getGuessList().size() + " guesses so far: " + outgoingInfo.getGuessList());
+			clientConnection.send(outgoingInfo);//Send its modified copy
 			//Now server should have updated itself with the changes
 			//TODO: Once you confirm, disable plays buttons and guessfield
 			// confirmButton.setDisable(true);

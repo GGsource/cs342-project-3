@@ -41,6 +41,7 @@ public class Client extends Thread{
                 }
                 else if(incomingInfo.isResetPigeon) { //We're being told about the game's state!
                     //We've been told to reset for a new game!
+                    System.out.println("Incoming message is a reset pigeon!!");
                     localInfo.reset();
                 }
                 else { //It wasn't a msg, it's the game's state
