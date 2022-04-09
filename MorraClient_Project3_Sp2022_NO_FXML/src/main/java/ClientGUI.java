@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -71,6 +72,10 @@ public class ClientGUI extends Application {
 		ListView<String> clientDialogueView = new ListView<>();
 		VBox topBox = new VBox(welcomeLabel, clientDialogueView);
 		topBox.setAlignment(Pos.CENTER);
+		Label opponentLabel = new Label("Opponent's Play:");
+		ImageView opponentView = new ImageView(new Image("/images/q.png"));
+		VBox opponentBox = new VBox(opponentLabel, opponentView);
+		opponentBox.setAlignment(Pos.CENTER);
 		Label playLabel = new Label("Select your Play:");
 		HBox playButtonsBox = new HBox();
 		playButtonsBox.setAlignment(Pos.CENTER);
@@ -79,14 +84,14 @@ public class ClientGUI extends Application {
 		HBox quitOrNewBox = new HBox(newGameButton, quitGameButton);
 		Label guessLabel = new Label("Insert your guess: ");
 		TextField guessField = new TextField("4");
+		guessField.setMaxWidth(40);
 		Button confirmButton = new Button("Confirm Selections");
-		for (int i = 0; i <= 6; i++) {
-			Button playButton = new Button(""+i);
+		for (int i = 0; i < 6; i++) {
+			Button playButton = new Button(""+i, new ImageView(new Image("/images/"+i+".png")));
 			playButton.setOnAction(e->{
 				selectedPlay = Integer.parseInt(playButton.getText());
 				guessField.setDisable(false);
 				confirmButton.setDisable(false);
-				quitOrNewBox.setDisable(false);
 				//DEBUGGING:
 				System.out.println("Your play is: " + selectedPlay);
 			});
@@ -95,22 +100,45 @@ public class ClientGUI extends Application {
 		VBox bottomBox = new VBox(playLabel, playButtonsBox, guessLabel, guessField, confirmButton);
 		bottomBox.setAlignment(Pos.CENTER);
 		quitOrNewBox.setAlignment(Pos.CENTER);
-		VBox clientGameBox = new VBox(topBox, bottomBox, quitOrNewBox);
+		VBox clientGameBox = new VBox(topBox, opponentBox, bottomBox, quitOrNewBox);
 		clientGameBox.setAlignment(Pos.CENTER);
-		sceneMap.put("clientGameScene", new Scene(clientGameBox, 350, 750));
+		sceneMap.put("clientGameScene", new Scene(clientGameBox, 525, 500));
 
 		//Connect Button On Action Method
 		connectButton.setOnAction(e->{
+			redWantsReplay = false;
+			blueWantsReplay = false;
 			clientConnection = new Client(data->{
 				Platform.runLater(()->{
-					clientDialogueView.getItems().add(data.toString());
+					String incomingMessage = data.toString();
+					if (incomingMessage.startsWith("%")) {
+						//Starts with % so we're being told to reenable buttons
+						playButtonsBox.setDisable(false);
+						confirmButton.setDisable(false);
+						guessField.setDisable(false);
+					} else if (incomingMessage.startsWith("#")) {
+						//Starts with # so we're being told to reenable play btns
+						playButtonsBox.setDisable(false);
+					} else if (incomingMessage.startsWith("@")) {
+						//Starts with @ so we're being told to reenable newgamebutton
+						newGameButton.setDisable(false);
+					} else if (incomingMessage.startsWith("^")) {
+						//Starts with ^ so we're being told what the opponent picked
+						String [] inString = incomingMessage.split("\\^");
+						for (String s : inString) {
+							System.out.println("inString had: " + s);
+						}
+						//Now set the graphic to instring[1]
+						opponentView.setImage(new Image("/images/" + inString[1]+".png"));
+					} else {
+						clientDialogueView.getItems().add(data.toString());
+					}
 				});
 			}, addressField.getText(), Integer.parseInt(portField.getText()));
-			
-			//buttonBox.setDisable(true);
+			playButtonsBox.setDisable(true);
 			guessField.setDisable(true);
 			confirmButton.setDisable(true);
-			quitOrNewBox.setDisable(true);
+			newGameButton.setDisable(true);
 			givenStage.setScene(sceneMap.get("clientGameScene"));
 			//DEBUGGING:
 			System.out.println("Successfully changed to client game scene!");
@@ -130,22 +158,24 @@ public class ClientGUI extends Application {
 			clientConnection.send(outgoingInfo);//Send its modified copy
 			//Now server should have updated itself with the changes
 			//TODO: Once you confirm, disable plays buttons and guessfield
-			// confirmButton.setDisable(true);
-			// guessField.setDisable(true);
-			// playButtonsBox.setDisable(true);
+			confirmButton.setDisable(true);
+			guessField.setDisable(true);
+			playButtonsBox.setDisable(true);
+			newGameButton.setDisable(true);
 		});
 
 		newGameButton.setOnAction(e->{
+			// playButtonsBox.setDisable(false);
+			// confirmButton.setDisable(false);
+			// guessField.setDisable(false);
 			//We need to clear the scores
 			try {
 				if (clientConnection.localInfo.isPlayerRed) {
-					redWantsReplay = true;
 					MorraInfo replayMsg = new MorraInfo("&");
 					replayMsg.isPlayerRed = true;
 					clientConnection.out.writeObject(replayMsg);
 				}
 				else {
-					blueWantsReplay = true;
 					MorraInfo replayMsg = new MorraInfo("&");
 					replayMsg.isPlayerRed = false;
 					clientConnection.out.writeObject(replayMsg);
@@ -153,15 +183,6 @@ public class ClientGUI extends Application {
 			} catch (IOException exc) {
 				System.out.println("Failed to notify others about desire to replay :/");
 				exc.printStackTrace();
-			}
-			System.out.println("redWantsReplay: " + redWantsReplay + "\nblueWantsReplay: " + blueWantsReplay);
-			if (redWantsReplay && blueWantsReplay) {
-				try {
-					clientConnection.out.writeObject(new MorraInfo("!"));
-				} catch (IOException exc) {
-					System.out.println("Failed to tell server to clear :(");
-					exc.printStackTrace();
-				}
 			}
 		});
 		quitGameButton.setOnAction(e->{

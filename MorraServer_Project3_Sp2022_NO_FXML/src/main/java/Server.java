@@ -17,9 +17,12 @@ public class Server {
     ClientThread clientRed = null;
     ClientThread clientBlue = null;
     boolean isGameStarted = false;
+    boolean isGameEnded = false;
     MorraInfo serverInfo;
     boolean receivedRedChoice;
     boolean receivedBlueChoice;
+    boolean redWantsReplay = false;
+    boolean blueWantsReplay = false;
 
     Server(Consumer<Serializable> call, int givenPort) {
         callback = call;
@@ -88,29 +91,32 @@ public class Server {
                         if (isGameStarted)
                             updateInfo(receivedInfo);
                     }
-                    else if (receivedInfo.msg.startsWith("!")){
-                        //clearGameState();
-                        InitializeGame();
-                    }
                     else if (receivedInfo.msg.startsWith("&")) {
                         //One of the players has told us they want to replay, let the others know
-                        if (receivedInfo.isPlayerRed)
+                        if (receivedInfo.isPlayerRed) {
                             messageAllClients("Red wants to replay!");
-                        else
+                            redWantsReplay = true;
+                        }
+                        else {
                             messageAllClients("Blue wants to replay!");
+                            blueWantsReplay = true;
+                        }
+                        if (redWantsReplay && blueWantsReplay) {
+                            InitializeGame();
+                        }
                     }
                 }
                 catch (Exception e) {
                     callback.accept(this.getRole() + " has disconnected!");
+                    redWantsReplay = false;
+                    blueWantsReplay = false;
                     if (this.isRed ) {
-                        playerCount -= 1;
                         //red just disconnected, remove it and send blue back into the waiting queue
                         clientRed = null;
                         //System.out.println("Client Blue left so they are now made null");
                         reassignPlayers(true);
                     }
                     else if (this.isBlue) {
-                        playerCount -= 1;
                         //Blue just disconnected, remove it and send red back to waiting
                         clientBlue = null;
                         //System.out.println("Client Blue left so they are now made null");
@@ -141,6 +147,7 @@ public class Server {
             else {
                 messageAllClients("Blue Player left, looking for a replacement...");
             }
+            playerCount -= 1;
             isGameStarted = false;
             //clearGameState();
             //Should check if new pairing can be made immediately
@@ -152,12 +159,16 @@ public class Server {
                         clientRed.isRed = true;
                         messageAllClients("A new Red Player was successfully been chosen!");
                         clientRed.out.writeObject(new MorraInfo("You have been chosen as the new Red Player"));
+                        playerCount += 1;
+                        guestCount -= 1;
                     }
                     else if (clientBlue == null) {
                         clientBlue = c;
                         clientBlue.isBlue = true;
                         messageAllClients("A new Blue Player was successfully been chosen!");
                         clientBlue.out.writeObject(new MorraInfo("You have been chosen as the new Blue Player"));
+                        playerCount += 1;
+                        guestCount -= 1;
                     }
                 }
                 else {
@@ -185,6 +196,7 @@ public class Server {
 
     public void InitializeGame() {
         try {
+            isGameEnded = false;
             isGameStarted = true;
             messageAllClients("Red and Blue are ready to begin!");
             clientRed.out.writeObject(new MorraInfo("New Game started! Good luck " + clientRed.getRole()));
@@ -195,6 +207,8 @@ public class Server {
             //System.out.println("Both players are connected, the game can now begin!");
             serverInfo = new MorraInfo();
             displayPlayerScores();
+            enableChoosingBtns();
+            sendPlayImages();
             //Now send both players a copy of MoraInfo
             MorraInfo rInfo = new MorraInfo();
             MorraInfo bInfo = new MorraInfo();
@@ -231,7 +245,7 @@ public class Server {
             displayUserCounts();
             callback.accept("New client has connected! They have been designated: " + c.getRole() + "!");
             if (hasTwoPlayers()) {
-                if (!isGameStarted) {
+                if (!isGameStarted && !isGameEnded) {
                     InitializeGame();
                 }
             }
@@ -282,13 +296,17 @@ public class Server {
         if (receivedRedChoice && receivedBlueChoice) {
             try {
                 //Both have given their guesses
-                int correctTotal = serverInfo.playerRedPlays.get(serverInfo.playerRedPlays.size()-1) + serverInfo.playerBluePlays.get(serverInfo.playerBluePlays.size()-1);
+                int redPlay = serverInfo.playerRedPlays.get(serverInfo.playerRedPlays.size()-1);
+                int bluePlay = serverInfo.playerBluePlays.get(serverInfo.playerBluePlays.size()-1);
+                int correctTotal = redPlay + bluePlay;
                 //we now have the correct total, compare it to the guesses
                 int redGuess = serverInfo.playerRedGuesses.get(serverInfo.playerRedGuesses.size()-1);
                 int blueGuess = serverInfo.playerBlueGuesses.get(serverInfo.playerBlueGuesses.size()-1);
                 messageAllClients("Red guessed:       " + redGuess);
                 messageAllClients("Blue guessed:      " + blueGuess);
                 messageAllClients("Correct total was: " + correctTotal);
+                //Send images of plays
+                sendPlayImages(redPlay, bluePlay);
                 if (redGuess == correctTotal && blueGuess != correctTotal) {
                     serverInfo.wonRound(true); //Only red was correct!
                     displayPlayerScores();
@@ -322,6 +340,9 @@ public class Server {
                 messageAllClients("Blue wins the game!");
                 clientBlue.out.writeObject(new MorraInfo("Congratulations you won the game!"));
                 isGameStarted = false;
+                isGameEnded = true;
+                //reenable new game button
+                enableNewGame();
             }
             else if (serverInfo.playerRedPoints == 2) {
                 //Red won!
@@ -329,6 +350,13 @@ public class Server {
                 messageAllClients("Red wins the game!");
                 clientRed.out.writeObject(new MorraInfo("Congratulations you won the game!"));
                 isGameStarted = false;
+                isGameEnded = true;
+                //reenable new game button
+                enableNewGame();
+            }
+            else {
+                //no one has won, reenable the buttons
+                enablePlayingFields();
             }
         } catch (IOException e) {
             System.out.println("Failed to congratulate the winner for finishing 😔");
@@ -390,5 +418,54 @@ public class Server {
     }
     private void displayPlayerScores() {
         callback.accept("?" + serverInfo.playerRedPoints + "?" + serverInfo.playerBluePoints);
+    }
+    private void enablePlayingFields () {
+        try {
+            clientBlue.out.writeObject(new MorraInfo("%"));
+            clientRed.out.writeObject(new MorraInfo("%"));
+        }
+        catch (IOException e) {
+            System.out.println("Uh oh, failed to reenable buttons and fields...");
+            e.printStackTrace();
+        }
+    }
+    private void enableChoosingBtns() {
+        try {
+            clientBlue.out.writeObject(new MorraInfo("#"));
+            clientRed.out.writeObject(new MorraInfo("#"));
+        }
+        catch (IOException e) {
+            System.out.println("Uh oh, failed to reenable buttons 0-5...");
+            e.printStackTrace();
+        }
+    }
+    private void enableNewGame() {
+        try {
+            clientRed.out.writeObject(new MorraInfo("@"));
+            clientBlue.out.writeObject(new MorraInfo("@"));
+        }
+        catch (IOException e) {
+            System.out.println("Uh oh, failed to reenable new game buttons...");
+            e.printStackTrace();
+        }
+    }
+    private void sendPlayImages (int rPlay, int bPlay) {
+        try {
+            clientRed.out.writeObject(new MorraInfo("^"+bPlay));
+            clientBlue.out.writeObject(new MorraInfo("^"+rPlay));
+        }
+        catch (IOException e) {
+            System.out.println("Uh oh, failed to send plays to set images...");
+            e.printStackTrace();
+        }
+    }
+    private void sendPlayImages() {
+        try {
+            clientRed.out.writeObject(new MorraInfo("^q"));
+            clientBlue.out.writeObject(new MorraInfo("^q"));
+        } catch (IOException e) {
+            System.out.println("Uh oh, failed to reset plays images...");
+            e.printStackTrace();
+        }
     }
 }

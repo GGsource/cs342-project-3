@@ -30,7 +30,7 @@ public class Client extends Thread{
             clientSocket.setTcpNoDelay(true);
         }
         catch (Exception e) {
-            System.out.println("Failed to create new socket for client 😔");
+            System.out.println("Failed to create new socket for client, server may not be up yet...");
         }
         while (true) {
             try {
