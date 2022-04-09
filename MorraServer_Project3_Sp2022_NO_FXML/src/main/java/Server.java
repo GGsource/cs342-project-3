@@ -77,34 +77,50 @@ public class Server {
                 try {
                     //FIXME: on round 2 it will still send round 1 values
                     MorraInfo receivedInfo = (MorraInfo)in.readObject();
+                    if (!receivedInfo.isMessagePigeon) {
+                        System.out.println("Incoming info before deciding if its red or blue:");
+                        System.out.println("incoming redPlays:    " + receivedInfo.playerRedPlays);
+                        System.out.println("incoming redGuesses:  " + receivedInfo.playerRedGuesses);
+                        System.out.println("incoming bluePlays:   " + receivedInfo.playerBluePlays);
+                        System.out.println("incoming blueGuesses: " + receivedInfo.playerBlueGuesses);
 
-                    System.out.println("Incoming info before deciding if its red or blue:");
-                    System.out.println("incoming redPlays:    " + receivedInfo.playerRedPlays);
-                    System.out.println("incoming redGuesses:  " + receivedInfo.playerRedGuesses);
-                    System.out.println("incoming bluePlays:   " + receivedInfo.playerBluePlays);
-                    System.out.println("incoming blueGuesses: " + receivedInfo.playerBlueGuesses);
-
-                    //A player sent info, receive it
-                    if (isGameStarted)
-                        updateInfo(receivedInfo);
+                        //A player sent info, receive it
+                        if (isGameStarted)
+                            updateInfo(receivedInfo);
+                    }
+                    else if (receivedInfo.msg.startsWith("!")){
+                        //clearGameState();
+                        InitializeGame();
+                    }
+                    else if (receivedInfo.msg.startsWith("&")) {
+                        //One of the players has told us they want to replay, let the others know
+                        if (receivedInfo.isPlayerRed)
+                            messageAllClients("Red wants to replay!");
+                        else
+                            messageAllClients("Blue wants to replay!");
+                    }
                 }
                 catch (Exception e) {
                     callback.accept(this.getRole() + " has disconnected!");
                     if (this.isRed ) {
+                        playerCount -= 1;
                         //red just disconnected, remove it and send blue back into the waiting queue
                         clientRed = null;
                         //System.out.println("Client Blue left so they are now made null");
                         reassignPlayers(true);
                     }
                     else if (this.isBlue) {
+                        playerCount -= 1;
                         //Blue just disconnected, remove it and send red back to waiting
                         clientBlue = null;
                         //System.out.println("Client Blue left so they are now made null");
                         reassignPlayers(false);
                     }
                     else {
+                        guestCount -= 1;
                         clientGuestList.remove(this); //Unlist this guest since they left
                     }
+                    displayUserCounts();
                     break;
                 }
             }
@@ -126,7 +142,7 @@ public class Server {
                 messageAllClients("Blue Player left, looking for a replacement...");
             }
             isGameStarted = false;
-            clearGameState();
+            //clearGameState();
             //Should check if new pairing can be made immediately
             try {
                 if (!clientGuestList.isEmpty()) {
@@ -178,6 +194,7 @@ public class Server {
             }
             //System.out.println("Both players are connected, the game can now begin!");
             serverInfo = new MorraInfo();
+            displayPlayerScores();
             //Now send both players a copy of MoraInfo
             MorraInfo rInfo = new MorraInfo();
             MorraInfo bInfo = new MorraInfo();
@@ -197,17 +214,21 @@ public class Server {
                 clientRed = c;
                 clientRed.isRed = true;
                 clientRed.out.writeObject(new MorraInfo("You have been assigned Player Red"));
+                playerCount += 1;
             }
             else if (clientBlue == null) {
                 clientBlue = c;
                 clientBlue.isBlue = true;
                 clientBlue.out.writeObject(new MorraInfo("You have been assigned Player Blue"));
+                playerCount += 1;
             }
             else {
                 c.isGuest = true;
                 clientGuestList.add(c);
                 c.out.writeObject(new MorraInfo("You have been assigned to the waiting list"));
+                guestCount += 1;
             }
+            displayUserCounts();
             callback.accept("New client has connected! They have been designated: " + c.getRole() + "!");
             if (hasTwoPlayers()) {
                 if (!isGameStarted) {
@@ -270,10 +291,12 @@ public class Server {
                 messageAllClients("Correct total was: " + correctTotal);
                 if (redGuess == correctTotal && blueGuess != correctTotal) {
                     serverInfo.wonRound(true); //Only red was correct!
+                    displayPlayerScores();
                     messageAllClients("Red guessed correctly! They get +1 point");
                 }
                 else if (blueGuess == correctTotal && redGuess != correctTotal) {
                     serverInfo.wonRound(false); //Only blue was correct!
+                    displayPlayerScores();
                     messageAllClients("Blue guessed correctly! +1 point");
                 }
                 else {
@@ -340,27 +363,32 @@ public class Server {
         }
     }
 
-    public void clearGameState() {
-        //TODO: Someone just left, reset all the game parameters!!
+    // public void clearGameState() {
+    //     isGameStarted = false;
+    //     receivedRedChoice = false;
+    //     receivedBlueChoice = false;
         
-        isGameStarted = false;
-        receivedRedChoice = false;
-        receivedBlueChoice = false;
+    //     //everything in serverInfo
+    //     serverInfo.reset();
         
-        //everything in serverInfo
-        serverInfo.reset();
-        
-        //tell clients to clear their infos too
-        try {
-            if (clientRed != null)
-                clientRed.out.writeObject(new MorraInfo(true));
-            if (clientBlue != null)
-                clientBlue.out.writeObject(new MorraInfo(true));
-        } catch (IOException e) {
-            System.out.println("Failed to tell the players to clear their games 😔");
-        }
-        //selectedPlay
-        //selectedGuess
+    //     //tell clients to clear their infos too
+    //     try {
+    //         if (clientRed != null)
+    //             clientRed.out.writeObject(new MorraInfo(true));
+    //         if (clientBlue != null)
+    //             clientBlue.out.writeObject(new MorraInfo(true));
+    //     } catch (IOException e) {
+    //         System.out.println("Failed to tell the players to clear their games 😔");
+    //     }
+    //     //selectedPlay
+    //     //selectedGuess
 
+    // }
+
+    private void displayUserCounts() {
+        callback.accept("*" + playerCount + "*" + guestCount);
+    }
+    private void displayPlayerScores() {
+        callback.accept("?" + serverInfo.playerRedPoints + "?" + serverInfo.playerBluePoints);
     }
 }

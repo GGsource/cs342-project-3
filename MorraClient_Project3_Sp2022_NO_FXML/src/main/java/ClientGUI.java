@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.HashMap;
 
 import javafx.application.Application;
@@ -20,6 +21,9 @@ public class ClientGUI extends Application {
 	Client clientConnection;
 	int selectedGuess;
 	int selectedPlay;
+	boolean redWantsReplay = false;
+	boolean blueWantsReplay = false;
+
 
 	public static void main(String[] args) {
 		launch(args);
@@ -99,7 +103,6 @@ public class ClientGUI extends Application {
 		connectButton.setOnAction(e->{
 			clientConnection = new Client(data->{
 				Platform.runLater(()->{
-					//TODO: If string begins with ! then reenable buttons
 					clientDialogueView.getItems().add(data.toString());
 				});
 			}, addressField.getText(), Integer.parseInt(portField.getText()));
@@ -134,11 +137,36 @@ public class ClientGUI extends Application {
 
 		newGameButton.setOnAction(e->{
 			//We need to clear the scores
-			//TODO: get to server's cleargamestate()
+			try {
+				if (clientConnection.localInfo.isPlayerRed) {
+					redWantsReplay = true;
+					MorraInfo replayMsg = new MorraInfo("&");
+					replayMsg.isPlayerRed = true;
+					clientConnection.out.writeObject(replayMsg);
+				}
+				else {
+					blueWantsReplay = true;
+					MorraInfo replayMsg = new MorraInfo("&");
+					replayMsg.isPlayerRed = false;
+					clientConnection.out.writeObject(replayMsg);
+				}
+			} catch (IOException exc) {
+				System.out.println("Failed to notify others about desire to replay :/");
+				exc.printStackTrace();
+			}
+			System.out.println("redWantsReplay: " + redWantsReplay + "\nblueWantsReplay: " + blueWantsReplay);
+			if (redWantsReplay && blueWantsReplay) {
+				try {
+					clientConnection.out.writeObject(new MorraInfo("!"));
+				} catch (IOException exc) {
+					System.out.println("Failed to tell server to clear :(");
+					exc.printStackTrace();
+				}
+			}
 		});
 		quitGameButton.setOnAction(e->{
-			givenStage.close();
-			//FIXME: DOESNT TRIGGER DISCONNECT DIALOGUE
+			Platform.exit();
+			System.exit(0);
 		});
 
 		return sceneMap;

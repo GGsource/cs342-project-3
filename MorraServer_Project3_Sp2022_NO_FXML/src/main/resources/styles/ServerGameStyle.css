@@ -2,6 +2,14 @@
     -fx-padding: 15px;
     -fx-background-color: GoldenRod;
 }
-.Label {
+.label {
     -fx-text-fill: white;
+}
+.HBox{
+    -fx-spacing: 10px;
+    -fx-background-color: darkorange;
+}
+.points{
+    -fx-padding: 5;
+    -fx-pref-width: 100;
 }
