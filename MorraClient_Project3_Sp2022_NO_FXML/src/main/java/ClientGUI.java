@@ -93,7 +93,7 @@ public class ClientGUI extends Application {
 		quitOrNewBox.setAlignment(Pos.CENTER);
 		VBox clientGameBox = new VBox(topBox, bottomBox, quitOrNewBox);
 		clientGameBox.setAlignment(Pos.CENTER);
-		sceneMap.put("clientGameScene", new Scene(clientGameBox, 300, 700));
+		sceneMap.put("clientGameScene", new Scene(clientGameBox, 350, 750));
 
 		//Connect Button On Action Method
 		connectButton.setOnAction(e->{

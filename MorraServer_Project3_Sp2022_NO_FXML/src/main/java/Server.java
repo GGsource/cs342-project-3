@@ -85,7 +85,8 @@ public class Server {
                     System.out.println("incoming blueGuesses: " + receivedInfo.playerBlueGuesses);
 
                     //A player sent info, receive it
-                    updateInfo(receivedInfo);
+                    if (isGameStarted)
+                        updateInfo(receivedInfo);
                 }
                 catch (Exception e) {
                     callback.accept(this.getRole() + " has disconnected!");
@@ -264,22 +265,19 @@ public class Server {
                 //we now have the correct total, compare it to the guesses
                 int redGuess = serverInfo.playerRedGuesses.get(serverInfo.playerRedGuesses.size()-1);
                 int blueGuess = serverInfo.playerBlueGuesses.get(serverInfo.playerBlueGuesses.size()-1);
+                messageAllClients("Red guessed:       " + redGuess);
+                messageAllClients("Blue guessed:      " + blueGuess);
+                messageAllClients("Correct total was: " + correctTotal);
                 if (redGuess == correctTotal && blueGuess != correctTotal) {
-                    System.out.println("Red guessed correctly! Now calling wonRound");
                     serverInfo.wonRound(true); //Only red was correct!
-                    //System.out.println("wonRound produced no errors!");
                     messageAllClients("Red guessed correctly! They get +1 point");
                 }
                 else if (blueGuess == correctTotal && redGuess != correctTotal) {
                     serverInfo.wonRound(false); //Only blue was correct!
                     messageAllClients("Blue guessed correctly! +1 point");
-                    checkGameEnd(); //Check if the game has been won now
                 }
                 else {
                     messageAllClients("Tie, no one gets points 😔");
-                    messageAllClients("Correct total was: " + correctTotal);
-                    messageAllClients("Red guessed: " + redGuess);
-                    messageAllClients("Blue guessed: " + blueGuess);
                 }
                 receivedRedChoice = false;
                 receivedBlueChoice = false;
@@ -299,13 +297,15 @@ public class Server {
                 //Blue won!
                 System.out.println("Blue won!");
                 messageAllClients("Blue wins the game!");
-                clientBlue.out.writeObject("Congratulations you won the game!");
+                clientBlue.out.writeObject(new MorraInfo("Congratulations you won the game!"));
+                isGameStarted = false;
             }
             else if (serverInfo.playerRedPoints == 2) {
                 //Red won!
                 System.out.println("Red won!");
                 messageAllClients("Red wins the game!");
-                clientRed.out.writeObject("Congratulations you won the game!");
+                clientRed.out.writeObject(new MorraInfo("Congratulations you won the game!"));
+                isGameStarted = false;
             }
         } catch (IOException e) {
             System.out.println("Failed to congratulate the winner for finishing 😔");
