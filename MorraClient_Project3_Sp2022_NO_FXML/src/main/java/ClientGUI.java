@@ -9,11 +9,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -54,6 +58,14 @@ public class ClientGUI extends Application {
 		HashMap<String, Scene> sceneMap = new HashMap<>();
 
 		//Client Intro Scene
+		//topbar
+		MenuItem statsItem = new MenuItem("Bug Facts");
+		Menu statsMenu = new Menu("Cool Stats");
+		statsMenu.getItems().add(statsItem);
+		MenuBar topBar = new MenuBar(statsMenu);
+		VBox barBox = new VBox(topBar);
+		statsItem.setOnAction(e->{givenStage.setScene(sceneMap.get("clientStatsScene"));});
+		//The rest
 		Label portLabel = new Label("Please enter the server's port:");
 		TextField portField = new TextField("5555");
 		Label addressLabel = new Label("Please enter the server's address");
@@ -63,8 +75,8 @@ public class ClientGUI extends Application {
 		Button connectButton = new Button("Connect");
 		VBox connectBox = new VBox(connectButton);
 		connectBox.setAlignment(Pos.CENTER);
-		VBox clientIntroBox = new VBox(serverDetailsBox, connectBox);
-		clientIntroBox.setAlignment(Pos.CENTER);
+		VBox clientIntroBox = new VBox(barBox, serverDetailsBox, connectBox);
+		clientIntroBox.setSpacing(30);
 		sceneMap.put("clientIntroScene", new Scene(clientIntroBox, 300, 300));
 
 		//Client Game Scene
@@ -103,6 +115,27 @@ public class ClientGUI extends Application {
 		VBox clientGameBox = new VBox(topBox, opponentBox, bottomBox, quitOrNewBox);
 		clientGameBox.setAlignment(Pos.CENTER);
 		sceneMap.put("clientGameScene", new Scene(clientGameBox, 525, 500));
+
+		//Bonus Stats Scene
+		ImageView coolBugView = new ImageView(new Image("/images/coolbugfacts.png"));
+		coolBugView.setPreserveRatio(true);
+		coolBugView.setFitWidth(300);
+		Label coolLabel = new Label("Cool Bug Fact:");
+		Label coolOptimalLabel = new Label("In terms of the optimal guesses, you should only ever make a guess between 0 and 10! Anything else is functionally impossible in this game.");
+		Label coolKnowledgeLabel = new Label("With that in mind, You will always know your own choice, so your choices can be cut down further. The sum can be anywhere from 0 to 5 integers above your own.");
+		Label coolStatsLabel = new Label("Thus we arrive at a correct guess chance of 1 in 6. So for every guess, you have a 16.67% chance of being correct. Not bad!");
+		coolOptimalLabel.setWrapText(true);
+		coolOptimalLabel.setTextAlignment(TextAlignment.CENTER);
+		coolKnowledgeLabel.setWrapText(true);
+		coolKnowledgeLabel.setTextAlignment(TextAlignment.CENTER);
+		coolStatsLabel.setWrapText(true);
+		coolStatsLabel.setTextAlignment(TextAlignment.CENTER);
+		Button returnButton = new Button("Return");
+		VBox clientStatsBox = new VBox(coolBugView, coolLabel, coolOptimalLabel, coolKnowledgeLabel, coolStatsLabel, returnButton);
+		clientStatsBox.setAlignment(Pos.CENTER);
+		clientStatsBox.setSpacing(20);
+		sceneMap.put("clientStatsScene", new Scene(clientStatsBox, 300, 600));
+		returnButton.setOnAction(e->{givenStage.setScene(sceneMap.get("clientIntroScene"));});
 
 		//Connect Button On Action Method
 		connectButton.setOnAction(e->{
