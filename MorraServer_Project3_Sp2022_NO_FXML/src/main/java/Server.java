@@ -30,12 +30,11 @@ public class Server {
         ourServer = new TheServer();
         ourServer.start();
     }
-    //FIXME: QUITTING MID GAME CAUSES CRASH!!
 
     public class TheServer extends Thread {
         public void run() {
             try (ServerSocket servingSocket = new ServerSocket(chosenPort);) {
-                System.out.println("Server is ready and waiting for clients on port "+ chosenPort +"!");
+                //System.out.print("Server is ready and waiting for clients on port "+ chosenPort +"!");
                 //DEBUGGING:
                 callback.accept("Server is now Open!");
 
@@ -74,18 +73,18 @@ public class Server {
             }
             catch (Exception e) {
                 System.out.println("Stream failed to open on new client :(");
+                e.printStackTrace();
             }
 
             while (true) {
                 try {
-                    //FIXME: on round 2 it will still send round 1 values
                     MorraInfo receivedInfo = (MorraInfo)in.readObject();
                     if (!receivedInfo.isMessagePigeon) {
-                        System.out.println("Incoming info before deciding if its red or blue:");
-                        System.out.println("incoming redPlays:    " + receivedInfo.playerRedPlays);
-                        System.out.println("incoming redGuesses:  " + receivedInfo.playerRedGuesses);
-                        System.out.println("incoming bluePlays:   " + receivedInfo.playerBluePlays);
-                        System.out.println("incoming blueGuesses: " + receivedInfo.playerBlueGuesses);
+                        //System.out.print("Incoming info before deciding if its red or blue:");
+                        //System.out.print("incoming redPlays:    " + receivedInfo.playerRedPlays);
+                        //System.out.print("incoming redGuesses:  " + receivedInfo.playerRedGuesses);
+                        //System.out.print("incoming bluePlays:   " + receivedInfo.playerBluePlays);
+                        //System.out.print("incoming blueGuesses: " + receivedInfo.playerBlueGuesses);
 
                         //A player sent info, receive it
                         if (isGameStarted)
@@ -256,39 +255,35 @@ public class Server {
         }
         catch (IOException e) {
             System.out.println("Uh oh. Couldn't write to thread's output...");
+            e.printStackTrace();
         }
     }
 
     private void updateInfo(MorraInfo incomingInfo) {
         //System.out.println("Entered updateInfo...");
         messageAllClients("One of the players has submitted their guess...");
-        try {//Check who sent by seeing which arraylist was updated
-            if (incomingInfo.playerRedPlays.size() > serverInfo.playerRedPlays.size()) {
-                System.out.println("incomingInfo has a larger array of clientRed's plays so it must be sent by Red...");
-                // System.out.println("server's redPlays:     " + serverInfo.playerRedPlays);
-                // System.out.println("clientRed's redPlays:  " + incomingInfo.playerRedPlays);
-                // System.out.println("server's bluePlays:    " + serverInfo.playerBluePlays);
-                // System.out.println("clientRed's bluePlays: N/A");
-                //Red plays increased so it was sent by red!
-                serverInfo.playerRedPlays.add(incomingInfo.getLastPlay());
-                serverInfo.playerRedGuesses.add(incomingInfo.getLastGuess());
-                receivedRedChoice = true;
-            }
-            else {
-                //Red plays didn't increase so this was sent by blue!
-                System.out.println("incomingInfo did noot have larger array of clientRed's plays so it must be sent by Blue...");
-                // System.out.println("server's redPlays:      " + serverInfo.playerRedPlays);
-                // System.out.println("clientBlue's redPlays:  N/A");
-                // System.out.println("server's bluePlays:     " + serverInfo.playerBluePlays);
-                // System.out.println("clientBlue's bluePlays: " + incomingInfo.playerBluePlays);
-
-                serverInfo.playerBluePlays.add(incomingInfo.getLastPlay());
-                serverInfo.playerBlueGuesses.add(incomingInfo.getLastGuess());
-                receivedBlueChoice = true;
-            }
+        if (incomingInfo.playerRedPlays.size() > serverInfo.playerRedPlays.size()) {
+            //System.out.print("incomingInfo has a larger array of clientRed's plays so it must be sent by Red...");
+            // System.out.println("server's redPlays:     " + serverInfo.playerRedPlays);
+            // System.out.println("clientRed's redPlays:  " + incomingInfo.playerRedPlays);
+            // System.out.println("server's bluePlays:    " + serverInfo.playerBluePlays);
+            // System.out.println("clientRed's bluePlays: N/A");
+            //Red plays increased so it was sent by red!
+            serverInfo.playerRedPlays.add(incomingInfo.getLastPlay());
+            serverInfo.playerRedGuesses.add(incomingInfo.getLastGuess());
+            receivedRedChoice = true;
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        else {
+            //Red plays didn't increase so this was sent by blue!
+            //System.out.print("incomingInfo did noot have larger array of clientRed's plays so it must be sent by Blue...");
+            // System.out.println("server's redPlays:      " + serverInfo.playerRedPlays);
+            // System.out.println("clientBlue's redPlays:  N/A");
+            // System.out.println("server's bluePlays:     " + serverInfo.playerBluePlays);
+            // System.out.println("clientBlue's bluePlays: " + incomingInfo.playerBluePlays);
+
+            serverInfo.playerBluePlays.add(incomingInfo.getLastPlay());
+            serverInfo.playerBlueGuesses.add(incomingInfo.getLastGuess());
+            receivedBlueChoice = true;
         }
         //System.out.println("Past first updateInfo if statement...");
         //Now we have received the choices of one of the players, determine
@@ -336,7 +331,7 @@ public class Server {
         try {
             if (serverInfo.playerBluePoints == 2) {
                 //Blue won!
-                System.out.println("Blue won!");
+                //System.out.print("Blue won!");
                 messageAllClients("Blue wins the game!");
                 clientBlue.out.writeObject(new MorraInfo("Congratulations you won the game!"));
                 isGameStarted = false;
@@ -346,7 +341,7 @@ public class Server {
             }
             else if (serverInfo.playerRedPoints == 2) {
                 //Red won!
-                System.out.println("Red won!");
+                //System.out.print("Red won!");
                 messageAllClients("Red wins the game!");
                 clientRed.out.writeObject(new MorraInfo("Congratulations you won the game!"));
                 isGameStarted = false;
@@ -360,6 +355,7 @@ public class Server {
             }
         } catch (IOException e) {
             System.out.println("Failed to congratulate the winner for finishing 😔");
+            e.printStackTrace();
         }
 
         //Send the clients a message showing the game has not ended so they can continue

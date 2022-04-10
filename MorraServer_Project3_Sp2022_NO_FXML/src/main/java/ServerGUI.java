@@ -101,7 +101,7 @@ public class ServerGUI extends Application {
 						redPointsLabel.setText("Red's Score: " + scores[1]);
 						bluePointsLabel.setText("Blue's Score: " + scores[2]);
 					} else {
-						serverDialogueView.getItems().add(data.toString());
+						serverDialogueView.getItems().add(incomingMessage);
 					}
 				});
 			}, Integer.parseInt(portField.getText()));

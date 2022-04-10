@@ -164,7 +164,7 @@ public class ClientGUI extends Application {
 						//Now set the graphic to instring[1]
 						opponentView.setImage(new Image("/images/" + inString[1]+".png"));
 					} else {
-						clientDialogueView.getItems().add(data.toString());
+						clientDialogueView.getItems().add(incomingMessage);
 					}
 				});
 			}, addressField.getText(), Integer.parseInt(portField.getText()));
