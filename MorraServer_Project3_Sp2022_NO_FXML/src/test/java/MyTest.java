@@ -1,18 +1,21 @@
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeAll;
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
 
 class MyTest {
-	Server testServer;
-	Client testClient;
+	ArrayList<String> messageList;
 
 	@BeforeEach
 	void start() {
-		testServer = new Server(data -> {
+		messageList = new ArrayList<>();
+	}
+	private Server createServer() {
+		return new Server(data -> {
 			Platform.runLater(()-> {
 				String incomingMessage = data.toString();
 				if (incomingMessage.startsWith("*")) {
@@ -34,8 +37,9 @@ class MyTest {
 				}
 			});
 		}, 5555);
-
-		testClient = new Client(data->{
+	}
+	private Client createClient () {
+		return new Client(data->{
 			Platform.runLater(()->{
 				String incomingMessage = data.toString();
 				if (incomingMessage.startsWith("%")) {
@@ -65,8 +69,22 @@ class MyTest {
 	}
 
 	@Test
-	void successfulConnectionTest() {
-		fail("Not yet implemented");
+	void clientWithNoServerTest() {
+		//An exception is thrown if we attempt to connect to a non-existant server
+		Client testClient = createClient();
+		assertThrows(Exception.class, ()->testClient.out.writeObject(""), "Exception wasn't thrown, despite there being no server to connect to!");
+	}
+	@Test
+	void serverWithNoClientsTest() {
+		Server testServer = createServer();
+		assertNull(testServer.clientRed, "Uh oh, Red Client isn't null despite no one connecting...");
+		assertNull(testServer.clientBlue, "Uh oh, Blue Client isn't null despite no one connecting...");
+	}
+	@Test
+	void serverWithOneClientTest() {
+		Server testServer = createServer();
+		Client testClient = createClient();
+		assertNotNull(testServer.clientRed, "Uh oh, Red Client is null despite a client being connected...");
 	}
 	
 
