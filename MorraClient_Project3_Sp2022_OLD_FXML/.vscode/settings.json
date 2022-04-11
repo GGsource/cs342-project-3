@@ -1,5 +1,5 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
-    "workbench.colorTheme": "One Dark Pro",
+    "workbench.colorTheme": "Dracula",
     "workbench.preferredDarkColorTheme": "Monokai Pro (Filter Spectrum)"
 }

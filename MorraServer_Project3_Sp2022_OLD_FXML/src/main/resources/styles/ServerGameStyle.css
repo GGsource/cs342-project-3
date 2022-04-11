@@ -1,0 +1,7 @@
+.vbox{
+    -fx-padding: 15px;
+    -fx-background-color: GoldenRod;
+}
+.label {
+    -fx-text-fill: white;
+}
