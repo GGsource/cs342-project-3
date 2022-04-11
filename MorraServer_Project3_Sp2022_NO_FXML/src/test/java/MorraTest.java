@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
 
-class MyTest {
+class MorraTest {
 	ArrayList<String> messageList;
 
 	@BeforeEach
@@ -20,7 +20,7 @@ class MyTest {
 				String incomingMessage = data.toString();
 				if (incomingMessage.startsWith("*")) {
 					//Starts with * so its an update on the user counts!
-					String[] users = incomingMessage.split("\\*");
+					//String[] users = incomingMessage.split("\\*");
 					// connectedPlayersLabel.setText("Players connected: " + users[1]);
 					// connectedGuestsLabel.setText("Guests connected: " + users[2]);
 					// if (Integer.parseInt(users[1]) > 1)
@@ -28,7 +28,7 @@ class MyTest {
 					// else
 					// 	connectedBox.setStyle("-fx-background-color: darkred;");
 				} else if(incomingMessage.startsWith("?")) {
-					String[] scores = incomingMessage.split("\\?");
+					//String[] scores = incomingMessage.split("\\?");
 					// redPointsLabel.setText("Red's Score: " + scores[1]);
 					// bluePointsLabel.setText("Blue's Score: " + scores[2]);
 				} else {
@@ -81,10 +81,9 @@ class MyTest {
 		assertNull(testServer.clientBlue, "Uh oh, Blue Client isn't null despite no one connecting...");
 	}
 	@Test
-	void serverWithOneClientTest() {
-		Server testServer = createServer();
-		Client testClient = createClient();
-		assertNotNull(testServer.clientRed, "Uh oh, Red Client is null despite a client being connected...");
+	void hasTwoPlayersTest() {
+		Server tServer = createServer();
+		assertFalse(tServer.hasTwoPlayers(), "It claims to have two servers despite no clients...");
 	}
 	
 

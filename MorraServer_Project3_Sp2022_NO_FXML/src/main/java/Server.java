@@ -66,6 +66,7 @@ public class Server {
 
         public void run() {
             try {
+                System.out.println("New client connected to this server!");
                 in = new ObjectInputStream(clientConnection.getInputStream());
                 out = new ObjectOutputStream(clientConnection.getOutputStream());
                 clientConnection.setTcpNoDelay(true);

@@ -27,6 +27,7 @@ public class Client extends Thread{
             clientSocket = new Socket(chosenAddress, chosenPort);
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
+            System.out.println("Client Socket successfully established.");
             clientSocket.setTcpNoDelay(true);
         }
         catch (Exception e) {
